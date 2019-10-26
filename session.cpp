@@ -39,8 +39,9 @@ void session::setCodeCommand()
 
 QByteArray session::readFromDB()
 {
-    QByteArray replay;
+    QByteArray replayBA;
     QSqlQuery query;
+    QJsonObject replayObj;
     QJsonObject replayDB;
     switch (codeCommand) {
         case 1:
@@ -59,12 +60,20 @@ QByteArray session::readFromDB()
                 }
                 replayDB.insert("1",client.id);
                 replayDB.insert("2",client.name);
-                QJsonDocument doc(replayDB);
-                replay = doc.toJson(QJsonDocument::Compact);
+//                qDebug() << "replayDB" << replayDB;
+                replayObj.insert("1",1);
+                replayObj.insert("2",replayDB);
+  //              qDebug() << "replayObj" << replayObj;
+                QJsonDocument docServer(replayObj);
+    //            qDebug() << "docServer" << docServer;
+                replayBA = docServer.toJson(QJsonDocument::Compact);
+      //          qDebug() << "replayBA" << replayBA;
+        //        QString strJson(docServer.toJson(QJsonDocument::Compact));
+          //      qDebug() << "strJson" << strJson;
             }
         break;
     }
-    return replay;
+    return replayBA;
 }
 
 ClientAuth session::getClient()
