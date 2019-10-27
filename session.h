@@ -20,7 +20,8 @@ public:
 private:
     QTcpSocket *socketSession;
     int codeCommand;
-    QString dataCommand;
+    QString login;
+    QString pass;
 //    QByteArray replayToClient;
 //    QSqlDatabase dbChat;
     void commandHandler();

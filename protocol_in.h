@@ -13,10 +13,13 @@ public:
     protocolIn();
     protocolIn(QTcpSocket *socket);
     int getCode();
-    QString getData();
+    QString getLoginClient();
+    QString getPassClient();
 private:
     int codeCommand;
-    QString dataCommand;
+    QString loginClient;
+    QString passClient;
+    QJsonObject jsonDataClient;
     QByteArray getMessage(QTcpSocket *socket);
 };
 

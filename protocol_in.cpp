@@ -10,21 +10,24 @@ protocolIn::protocolIn(QTcpSocket *socket)
     }
     else{
         QByteArray mess = getMessage(socket);
-        qDebug() << "mess" << mess;
+        //qDebug() << "mess" << mess;
         //QDataStream stream(mess);
         QString jsonStr(mess);
         //stream >> jsonStr;
-        qDebug() << "jsonStr" << jsonStr;
+        //qDebug() << "jsonStr" << jsonStr;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8());
         QJsonObject jsonObj = jsonDoc.object();
 //        for (const QString& eachKey : jsonObj.keys())
 //        {
 //            qDebug() << eachKey << "=" << jsonObj.value(eachKey).toString();
 //        }
-        QVariantMap Map = jsonObj.toVariantMap();
-        //qWarning() << "Test: " << Map["ID"].toString();
-        codeCommand = Map["1"].toInt();
-        dataCommand = Map["2"].toString();
+        codeCommand = jsonObj.value("1").toInt();
+        jsonDataClient = jsonObj.value("2").toObject();
+        qDebug() << "jsonDataClient" << jsonDataClient;
+//        QVariantMap Map = jsonObj.toVariantMap();
+//        //qWarning() << "Test: " << Map["ID"].toString();
+//        codeCommand = Map["1"].toInt();
+//        dataCommand = Map["2"].toString();
     }
 }
 
@@ -33,9 +36,14 @@ int protocolIn::getCode()
     return codeCommand;
 }
 
-QString protocolIn::getData()
+QString protocolIn::getLoginClient()
 {
-    return dataCommand;
+    return jsonDataClient.value("1").toString();
+}
+
+QString protocolIn::getPassClient()
+{
+    return jsonDataClient.value("2").toString();
 }
 
 QByteArray protocolIn::getMessage(QTcpSocket *socket)

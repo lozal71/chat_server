@@ -32,9 +32,11 @@ void session::setCodeCommand()
 {
     protocolIn InputMessage(socketSession);
     codeCommand = InputMessage.getCode();
-    dataCommand = InputMessage.getData();
-    //qDebug() << "codeCommand " << codeCommand;
-    //qDebug() << "dataCommand " << dataCommand;
+    login = InputMessage.getLoginClient();
+    pass = InputMessage.getPassClient();
+    qDebug() << "codeCommand " << codeCommand;
+    qDebug() << "login " << login;
+    qDebug() << "pass " << pass;
 }
 
 QByteArray session::readFromDB()
@@ -46,9 +48,11 @@ QByteArray session::readFromDB()
     switch (codeCommand) {
         case 1:
             QString queryString = "select id,name from users where users.login=\"";
-            queryString.append(dataCommand);
+            queryString.append(login);
+            queryString.append("\" and users.password=\"");
+            queryString.append(pass);
             queryString.append("\"");
-            //qDebug() << "queryString" << queryString;
+            qDebug() << "queryString" << queryString;
             if (!query.exec(queryString)){
                     qDebug() << "query error" << query.lastError();
             }
@@ -60,10 +64,10 @@ QByteArray session::readFromDB()
                 }
                 replayDB.insert("1",client.id);
                 replayDB.insert("2",client.name);
-//                qDebug() << "replayDB" << replayDB;
+                qDebug() << "replayDB" << replayDB;
                 replayObj.insert("1",1);
                 replayObj.insert("2",replayDB);
-  //              qDebug() << "replayObj" << replayObj;
+              qDebug() << "replayObj" << replayObj;
                 QJsonDocument docServer(replayObj);
     //            qDebug() << "docServer" << docServer;
                 replayBA = docServer.toJson(QJsonDocument::Compact);
