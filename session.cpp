@@ -1,6 +1,4 @@
 #include "session.h"
-#include "protocol_out.h"
-#include "protocol_in.h"
 
 session::session(QTcpSocket *socket)
 {
@@ -13,40 +11,52 @@ session::session(QTcpSocket *socket)
 
 void session::commandHandler()
 {
-    QByteArray replayToClient;
-    setCodeCommand();
+    protocolIn InputMessage(socketSession);
+    codeCommand = InputMessage.getCode();
+    QByteArray baRreplayToClient;
+    QJsonObject joTemp;
     switch (codeCommand) {
-            case 0:
-                replayToClient = "{ \"1\": 0, \"2\": \"your have send message-error\"}";
+            case setCodeCommand::ErrorMessage:
+            {
+                joTemp.insert("codeCommand", setCodeCommand::ErrorMessage);
+                joTemp.insert("joDataInput", "your have send message-error");
+            }
             break;
-            default:
-                 replayToClient = readFromDB();
+            case setCodeCommand::Auth:
+            {
+                joTemp.insert("codeCommand", setCodeCommand::Auth);
+                login =InputMessage.getLoginClient();
+                pass = InputMessage.getPassClient();
+                joTemp.insert("joDataInput", readFromDB());
+            }
+            break;
+            case setCodeCommand::SessionClosed:
+            {}
+            break;
+            case setCodeCommand::NoConnect:
+            {}
             break;
         }
-   // qDebug() << "replayToClient " << replayToClient;
-    protocolOut OutputMessage(replayToClient);
+    qDebug() << "joTemp " << joTemp;
+    QJsonDocument doc(joTemp);
+    baRreplayToClient = doc.toJson(QJsonDocument::Compact);
+    protocolOut OutputMessage(baRreplayToClient);
     socketSession->write(OutputMessage.getMessageToClient());
 }
 
-void session::setCodeCommand()
+QJsonObject session::readFromDB()
 {
-    protocolIn InputMessage(socketSession);
-    codeCommand = InputMessage.getCode();
-    dataCommand = InputMessage.getData();
-    //qDebug() << "codeCommand " << codeCommand;
-    //qDebug() << "dataCommand " << dataCommand;
-}
-
-QByteArray session::readFromDB()
-{
-    QByteArray replayBA;
     QSqlQuery query;
-    QJsonObject replayObj;
-    QJsonObject replayDB;
-    switch (codeCommand) {
-        case 1:
+    QJsonObject joReplayDB;
+    switch (codeCommand)
+    {
+        case setCodeCommand::ErrorMessage: {} break;
+        case setCodeCommand::Auth:
+        {
             QString queryString = "select id,name from users where users.login=\"";
-            queryString.append(dataCommand);
+            queryString.append(login);
+            queryString.append("\" and users.password=\"");
+            queryString.append(pass);
             queryString.append("\"");
             //qDebug() << "queryString" << queryString;
             if (!query.exec(queryString)){
@@ -55,29 +65,18 @@ QByteArray session::readFromDB()
             else {
                 //qDebug() << "query success" ;
                 while (query.next()){
-                    client.id = query.value(0).toInt();
-                    client.name = query.value(1).toString();
+                    joReplayDB.insert("id",query.value(0).toInt());
+                     joReplayDB.insert("name",query.value(1).toString());
                 }
-                replayDB.insert("1",client.id);
-                replayDB.insert("2",client.name);
-//                qDebug() << "replayDB" << replayDB;
-                replayObj.insert("1",1);
-                replayObj.insert("2",replayDB);
-  //              qDebug() << "replayObj" << replayObj;
-                QJsonDocument docServer(replayObj);
-    //            qDebug() << "docServer" << docServer;
-                replayBA = docServer.toJson(QJsonDocument::Compact);
-      //          qDebug() << "replayBA" << replayBA;
-        //        QString strJson(docServer.toJson(QJsonDocument::Compact));
-          //      qDebug() << "strJson" << strJson;
             }
-        break;
+        }
+         break;
+        case setCodeCommand::NoConnect:
+            {} break;
+        case setCodeCommand::SessionClosed:
+            {} break;
     }
-    return replayBA;
-}
-
-ClientAuth session::getClient()
-{
-    return client;
+    qDebug() << "joReplayDB " << joReplayDB;
+    return joReplayDB;
 }
 

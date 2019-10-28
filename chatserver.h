@@ -5,8 +5,6 @@
 #include <QList>
 #include <QDir>
 #include <QFile>
-#include "protocol_in.h"
-#include "protocol_out.h"
 #include "session.h"
 
 class chatServer: public QObject

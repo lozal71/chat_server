@@ -4,19 +4,22 @@
 #include <QTcpSocket>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QVariantMap>
 #include <QDebug>
+
+enum setCodeCommand {ErrorMessage, Auth, SessionClosed,  NoConnect } ;
 
 class protocolIn: public QObject
 {
 public:
-    protocolIn();
     protocolIn(QTcpSocket *socket);
-    int getCode();
-    QString getData();
+    setCodeCommand getCode();
+    QString getLoginClient();
+    QString getPassClient();
 private:
-    int codeCommand;
-    QString dataCommand;
+    setCodeCommand codeCommand;
+    QString loginClient;
+    QString passClient;
+    QJsonObject jsonDataClient;
     QByteArray getMessage(QTcpSocket *socket);
 };
 
