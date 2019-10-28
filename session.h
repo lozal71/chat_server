@@ -5,34 +5,27 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlDatabase>
+#include "protocol_in.h"
+#include "protocol_out.h"
 
-struct ClientAuth{
-    int id;
-    QString name;
-};
 
 class session: public QObject
 {
     Q_OBJECT
 public:
     session(QTcpSocket *socket);
-    ClientAuth client;
+
 private:
     QTcpSocket *socketSession;
-    int codeCommand;
+    setCodeCommand codeCommand;
     QString login;
     QString pass;
-//    QByteArray replayToClient;
-//    QSqlDatabase dbChat;
     void commandHandler();
-    void setCodeCommand();
-    QByteArray readFromDB();
-//    void connectChatToDB();
-    ClientAuth getClient();
+    //void setCodeCommand();
+    QJsonObject readFromDB();
 
 signals:
     void connectClosed();
-//    void signalConnectDB();
 };
 
 #endif // SESSION_H

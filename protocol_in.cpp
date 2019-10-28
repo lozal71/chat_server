@@ -1,49 +1,35 @@
 #include "protocol_in.h"
 
-protocolIn::protocolIn(){
-}
 
 protocolIn::protocolIn(QTcpSocket *socket)
 {
     if (socket->bytesAvailable()< 4){
-        codeCommand = 0;
+        codeCommand = ErrorMessage;
     }
     else{
         QByteArray mess = getMessage(socket);
-        //qDebug() << "mess" << mess;
-        //QDataStream stream(mess);
         QString jsonStr(mess);
-        //stream >> jsonStr;
-        //qDebug() << "jsonStr" << jsonStr;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8());
         QJsonObject jsonObj = jsonDoc.object();
-//        for (const QString& eachKey : jsonObj.keys())
-//        {
-//            qDebug() << eachKey << "=" << jsonObj.value(eachKey).toString();
-//        }
-        codeCommand = jsonObj.value("1").toInt();
-        jsonDataClient = jsonObj.value("2").toObject();
-        qDebug() << "jsonDataClient" << jsonDataClient;
-//        QVariantMap Map = jsonObj.toVariantMap();
-//        //qWarning() << "Test: " << Map["ID"].toString();
-//        codeCommand = Map["1"].toInt();
-//        dataCommand = Map["2"].toString();
+        codeCommand = setCodeCommand(jsonObj.value("codeCommand").toInt());
+        jsonDataClient = jsonObj.value("joDataInput").toObject();
+//        qDebug() << "jsonDataClient" << jsonDataClient;
     }
 }
 
-int protocolIn::getCode()
+setCodeCommand protocolIn::getCode()
 {
     return codeCommand;
 }
 
 QString protocolIn::getLoginClient()
 {
-    return jsonDataClient.value("1").toString();
+    return jsonDataClient.value("login").toString();
 }
 
 QString protocolIn::getPassClient()
 {
-    return jsonDataClient.value("2").toString();
+    return jsonDataClient.value("pass").toString();
 }
 
 QByteArray protocolIn::getMessage(QTcpSocket *socket)

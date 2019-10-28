@@ -47,17 +47,17 @@ void chatServer::connectChatToDB()
     dbChat = QSqlDatabase::addDatabase("QSQLITE");
     QString pathBIN = QDir::currentPath();
     QString pathDB = QFileInfo(pathBIN).path();
-    qDebug() <<"pathDB" << pathDB << "\n";
+    qDebug() <<"pathDB" << pathDB;
     //dbChat.setDatabaseName("D:/itstep/Qt/Projects/server_221019/chat_server-master/chat_server-master/chat.db3");
     dbChat.setDatabaseName(pathDB+"/DB/chat.db3");
     if (!dbChat.open())
     {
-        qDebug() << "error connect\n";
+        qDebug() << "error connect";
     }
     else
     {
         emit dbConnected();
-        qDebug() << "\n connect to db\n";
+        qDebug() << "connect to db";
 
     }
 }
