@@ -7,7 +7,7 @@
 #include <QSqlDatabase>
 #include "protocol_in.h"
 #include "protocol_out.h"
-
+#include <QThread>
 
 class session: public QObject
 {
@@ -21,11 +21,11 @@ private:
     QString login;
     QString pass;
     void commandHandler();
-    //void setCodeCommand();
     QJsonObject readFromDB();
 
 signals:
     void connectClosed();
+    void sessionClosed();
 };
 
 #endif // SESSION_H

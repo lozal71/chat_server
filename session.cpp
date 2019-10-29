@@ -11,6 +11,8 @@ session::session(QTcpSocket *socket)
 
 void session::commandHandler()
 {
+    //QThread::sleep(10000);
+
     protocolIn InputMessage(socketSession);
     codeCommand = InputMessage.getCode();
     QByteArray baRreplayToClient;
@@ -60,13 +62,28 @@ QJsonObject session::readFromDB()
             queryString.append("\"");
             //qDebug() << "queryString" << queryString;
             if (!query.exec(queryString)){
-                    qDebug() << "query error" << query.lastError();
+                    qDebug() << "query SELECT error" << query.lastError();
             }
             else {
                 //qDebug() << "query success" ;
                 while (query.next()){
-                    joReplayDB.insert("id",query.value(0).toInt());
-                     joReplayDB.insert("name",query.value(1).toString());
+                    //qDebug() << "query.size()" << query.numRowsAffected();
+                    if (query.numRowsAffected() != -1){
+                        joReplayDB.insert("id",query.value(0).toInt());
+                        joReplayDB.insert("name",query.value(1).toString());
+                        QString queryString1;
+                        queryString1 = "UPDATE users SET status = 1  WHERE id = \"";
+                        queryString1.append(QString::number(query.value(0).toInt()));
+                        queryString1.append("\"");
+                        if (!query.exec(queryString1)){
+                            qDebug() << "query UPDATE error" << query.lastError();
+                        }
+
+                     }
+                    else{
+                        joReplayDB.insert("id",0);
+                        joReplayDB.insert("name","null");
+                    }
                 }
             }
         }

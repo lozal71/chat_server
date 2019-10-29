@@ -19,6 +19,7 @@ public:
 private:
     Ui::MainWindow *ui;
     chatServer* server;
+    session *sessionServer;
 private:
     void netError(const QString& text);
     void netSuccess();
